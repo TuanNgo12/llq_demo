@@ -1,22 +1,25 @@
 package com.example.demo.entity;
 
+import com.example.demo.Enum.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @Table(name = "PMH_USERS")
 public class User implements UserDetails {
 
@@ -34,18 +37,52 @@ public class User implements UserDetails {
     @Column(name = "PASSWORD")
     private String passWord;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private String enabled = "Y";
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "PMH_USER_ROLES",
+            joinColumns = @JoinColumn(name = "USER_ID"),
+            inverseJoinColumns = @JoinColumn(name = "ROLE_ID")
+    )
+    @Builder.Default
+    private Set<Roles> roles = new HashSet<>();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return roles.stream()
+                .map(roles -> new SimpleGrantedAuthority(roles.getName()))
+                .collect(Collectors.toSet());
     }
 
     @Override
     public @Nullable String getPassword() {
-        return "";
+        return passWord;
     }
 
     @Override
     public String getUsername() {
-        return "";
+        return userName;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return "Y".equalsIgnoreCase(enabled);
     }
 }
