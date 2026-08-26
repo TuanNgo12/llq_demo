@@ -2,9 +2,7 @@ package com.example.demo.service.impl;
 
 import com.example.demo.Enum.SortFieldEnum;
 import com.example.demo.Ultils.ExcelBase;
-import com.example.demo.entity.Component;
 import com.example.demo.entity.GroupCategory;
-import com.example.demo.repository.Component.ComponentRepository;
 import com.example.demo.repository.GroupCategory.GroupCategoryRepository;
 import com.example.demo.dto.request.groupCategory.GroupCategoryRequest;
 import com.example.demo.dto.request.groupCategory.GroupCategorySearchRequest;
@@ -12,13 +10,13 @@ import com.example.demo.service.GroupCategoryService;
 import jakarta.persistence.*;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -47,8 +45,20 @@ public class GroupCategoryServiceImpl implements GroupCategoryService{
 
     @Override
     public GroupCategory add(GroupCategoryRequest request) {
-        Map<String, String> errors = new HashMap<>();
-        boolean exists = groupCategoryRepository.existsDuplicate(request.getParamValue(), request.getParamType());
+//        Map<String, String> errors = new HashMap<>();
+//        boolean exists = groupCategoryRepository.existsDuplicate(request.getParamValue(), request.getParamType());
+        boolean existsDuplicate = groupCategoryRepository.existsDuplicate(
+                null,
+                request.getParamType(),
+                request.getParamValue(),
+                request.getEffectiveDate()
+        );
+        if (existsDuplicate){
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Dữ liệu đã tồn tại!"
+            );
+        }
 //        if (exists) {
 //            errors.put("paramType", "Loại tham số đã tồn tại");
 //            errors.put("paramValue", "Giá trị tham số đã tồn tại");
@@ -495,14 +505,17 @@ public class GroupCategoryServiceImpl implements GroupCategoryService{
     }
 
     @Override
+    @Scheduled(
+            cron = "${scheduler.group-category-activation.cron:0 * * * * *}",
+            zone = "Asia/Ho_Chi_Minh"
+    )
     @Transactional
     public int activateParams() {
-        System.out.println("Default timezone: " + TimeZone.getDefault());
-        System.out.println("Current date: " + new Date());
         Date now = new Date();
-        System.out.println("Activating parameters at: " + new Date());
         int updated = groupCategoryRepository.activateParams(now);
-        System.out.println("Updated rows: " + updated);
+        if (updated > 0) {
+            System.out.println("Đã tự động kích hoạt "+ updated+ " tham số (EFFECTIVE_DATE <= now)");
+        }
         return updated;
     }
 

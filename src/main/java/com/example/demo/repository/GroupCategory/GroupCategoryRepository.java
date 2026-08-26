@@ -22,7 +22,7 @@ public interface GroupCategoryRepository extends JpaRepository<GroupCategory, Lo
     SELECT CASE WHEN COUNT(g) > 0 THEN true ELSE false END
     FROM GroupCategory g
     WHERE g.paramValue = :paramValue
-       OR g.paramType = :paramType
+       AND g.paramType = :paramType
 """)
     boolean existsDuplicate(
             @Param("paramValue") String paramValue,
@@ -49,4 +49,23 @@ public interface GroupCategoryRepository extends JpaRepository<GroupCategory, Lo
       )
     """)
     boolean existsEffectiveDateInRange(@Param("id") Long id, @Param("effectiveDate") Date effectiveDate);
+
+    @Query("""
+    SELECT CASE WHEN COUNT(g) > 0 THEN true ELSE false END
+    FROM GroupCategory g
+    WHERE g.paramValue = :paramValue
+      AND g.paramType = :paramType
+      AND (:id IS NULL OR g.id <> :id)
+      AND g.effectiveDate <= :effectiveDate
+      AND (
+          g.endEffectiveDate IS NULL
+          OR g.endEffectiveDate >= :effectiveDate
+      )
+""")
+    boolean existsDuplicate(
+            @Param("id") Long id,
+            @Param("paramValue") String paramValue,
+            @Param("paramType") String paramType,
+            @Param("effectiveDate") Date effectiveDate
+    );
 }

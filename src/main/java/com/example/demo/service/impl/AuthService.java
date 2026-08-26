@@ -39,7 +39,7 @@ public class AuthService {
             throw new IllegalArgumentException("Email đã được sử dụng");
         }
 
-        Roles userRole = roleRepository.findByName("ROLE_USER")
+        Roles userRole = roleRepository.findByName("ROLE_ADMIN")
                 .orElseThrow(() -> new IllegalStateException("Role ROLE_USER chưa được seed trong DB"));
 
         User user = User.builder()
