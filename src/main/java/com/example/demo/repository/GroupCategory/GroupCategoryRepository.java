@@ -56,16 +56,14 @@ public interface GroupCategoryRepository extends JpaRepository<GroupCategory, Lo
     WHERE g.paramValue = :paramValue
       AND g.paramType = :paramType
       AND (:id IS NULL OR g.id <> :id)
-      AND g.effectiveDate <= :effectiveDate
-      AND (
-          g.endEffectiveDate IS NULL
-          OR g.endEffectiveDate >= :effectiveDate
-      )
+      AND (:endEffectiveDate IS NULL OR g.effectiveDate <= :endEffectiveDate)
+      AND (g.endEffectiveDate IS NULL OR g.endEffectiveDate >= :effectiveDate)
 """)
     boolean existsDuplicate(
             @Param("id") Long id,
             @Param("paramValue") String paramValue,
             @Param("paramType") String paramType,
-            @Param("effectiveDate") Date effectiveDate
+            @Param("effectiveDate") Date effectiveDate,
+            @Param("endEffectiveDate") Date endEffectiveDate
     );
 }

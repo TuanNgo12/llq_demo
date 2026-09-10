@@ -24,7 +24,15 @@ import java.util.stream.Collectors;
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue( strategy = GenerationType.IDENTITY)
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "user_seq"
+    )
+    @SequenceGenerator(
+            name = "user_seq",
+            sequenceName = "PMH_USERS_SEQ",
+            allocationSize = 1
+    )
     @Column(name = "ID")
     private Long id;
 
@@ -42,7 +50,7 @@ public class User implements UserDetails {
     private String enabled = "Y";
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "PMH_USER_ROLES",
+    @JoinTable(name = "PMH_USER_ROLE",
             joinColumns = @JoinColumn(name = "USER_ID"),
             inverseJoinColumns = @JoinColumn(name = "ROLE_ID")
     )
@@ -52,7 +60,7 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
-                .map(roles -> new SimpleGrantedAuthority(roles.getName()))
+                .map(role -> new SimpleGrantedAuthority(role.getRoleCode()))
                 .collect(Collectors.toSet());
     }
 

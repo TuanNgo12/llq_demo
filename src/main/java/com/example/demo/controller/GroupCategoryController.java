@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.io.ByteArrayInputStream;
 import java.text.SimpleDateFormat;
@@ -31,25 +32,35 @@ public class GroupCategoryController {
         return ResponseEntity.ok(groupCategoryService.findAll());
     }
 
+    @GetMapping("update/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_MAKER','ROLE_ADMIN')")
+    public ResponseEntity<?> getByID(@Valid @PathVariable Long id) {
+        return ResponseEntity.ok(groupCategoryService.findById(id));
+    }
+
     @PostMapping("/add")
+    @PreAuthorize("hasAnyAuthority('ROLE_MAKER','ROLE_ADMIN')")
     public ResponseEntity<?> addGroupCategory(@Valid @RequestBody GroupCategoryRequest request) {
         GroupCategory groupCategory = groupCategoryService.add(request);
         return ResponseEntity.ok(groupCategory);
     }
 
     @PostMapping("/update")
+    @PreAuthorize("hasAnyAuthority('ROLE_MAKER','ROLE_ADMIN')")
     public ResponseEntity<?> updateGroupCategory(@RequestBody GroupCategoryRequest request) {
         GroupCategory groupCategory = groupCategoryService.update(request);
         return ResponseEntity.ok(groupCategory);
     }
 
     @PostMapping("/delete")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> deleteGroupCategory(@RequestBody GroupCategoryRequest request) {
         GroupCategory groupCategory = groupCategoryService.delete(request);
         return ResponseEntity.ok(groupCategory);
     }
 
     @PostMapping("/update-status")
+    @PreAuthorize("hasAnyAuthority('ROLE_MAKER','ROLE_CHECKER','ROLE_ADMIN','ROLE_VIEWER')")
     public ResponseEntity<?> updateStatusGroupCategory(@RequestBody List<GroupCategoryRequest> request) {
         try {
             List<GroupCategory> updatedList = groupCategoryService.updateList(request);
@@ -62,6 +73,7 @@ public class GroupCategoryController {
     }
 
     @PostMapping("/update-status-list")
+    @PreAuthorize("hasAnyAuthority('ROLE_MAKER','ROLE_CHECKER','ROLE_ADMIN','ROLE_VIEWER')")
     public ResponseEntity<?> updateStatusListGroupCategory(@RequestBody StatusRequest request) {
         try {
             Map<String, Object> result =groupCategoryService.updateStatusBatch(
@@ -77,6 +89,7 @@ public class GroupCategoryController {
     }
 
     @PostMapping("/panding")
+    @PreAuthorize("hasAnyAuthority('ROLE_MAKER','ROLE_CHECKER','ROLE_ADMIN')")
     public ResponseEntity<?> panding(@RequestBody StatusRequest request) {
         try {
             Map<String, Object> result =groupCategoryService.panding(
@@ -92,6 +105,7 @@ public class GroupCategoryController {
     }
 
     @PostMapping("/approve")
+    @PreAuthorize("hasAnyAuthority('ROLE_CHECKER','ROLE_ADMIN')")
     public ResponseEntity<?> approve(@RequestBody StatusRequest request) {
         try {
             Map<String, Object> result =groupCategoryService.approve(
@@ -107,6 +121,7 @@ public class GroupCategoryController {
     }
 
     @PostMapping("/reject")
+    @PreAuthorize("hasAnyAuthority('ROLE_CHECKER','ROLE_ADMIN')")
     public ResponseEntity<?> reject(@RequestBody StatusRequest request) {
         try {
             Map<String, Object> result =groupCategoryService.reject(
@@ -122,6 +137,7 @@ public class GroupCategoryController {
     }
 
     @PostMapping("/cancel")
+    @PreAuthorize("hasAnyAuthority('ROLE_CHECKER','ROLE_ADMIN')")
     public ResponseEntity<?> cancel(@RequestBody StatusRequest request) {
         try {
             Map<String, Object> result =groupCategoryService.cancel(
@@ -137,24 +153,28 @@ public class GroupCategoryController {
     }
 
     @PostMapping("/search")
+    @PreAuthorize("hasAnyAuthority('ROLE_MAKER','ROLE_CHECKER','ROLE_ADMIN','ROLE_VIEWER')")
     public ResponseEntity<?> searchGroupCategories(@RequestBody GroupCategorySearchRequest request) {
         Page<GroupCategory> page = groupCategoryService.findBySpecification(request);
         return ResponseEntity.ok(page);
     }
 
     @PostMapping("/search-native-query")
+    @PreAuthorize("hasAnyAuthority('ROLE_MAKER','ROLE_CHECKER','ROLE_ADMIN','ROLE_VIEWER')")
     public ResponseEntity<?> searchGroupCategoryNativeQuery(@RequestBody GroupCategorySearchRequest request) {
         Page<GroupCategory> page = groupCategoryService.findByNativeQuery(request);
         return ResponseEntity.ok(page);
     }
 
     @PostMapping("/search-procedure")
+    @PreAuthorize("hasAnyAuthority('ROLE_MAKER','ROLE_CHECKER','ROLE_ADMIN','ROLE_VIEWER')")
     public ResponseEntity<?> searchGroupCategoryProcedure(@RequestBody GroupCategorySearchRequest request) {
         Page<GroupCategory> page = groupCategoryService.findByProcedure(request);
         return ResponseEntity.ok(page);
     }
 
     @PostMapping("/export-excel")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> exportExcel(@RequestBody GroupCategorySearchRequest request) {
         try {
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());

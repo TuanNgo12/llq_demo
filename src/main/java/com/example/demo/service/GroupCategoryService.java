@@ -13,6 +13,8 @@ public interface GroupCategoryService {
 
     Page<GroupCategory> findAll();
 
+    GroupCategory findById(Long id);
+
     GroupCategory add(GroupCategoryRequest request);
 
     GroupCategory update(GroupCategoryRequest request);

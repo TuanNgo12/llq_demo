@@ -11,6 +11,7 @@ import com.example.demo.repository.User.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,31 +40,33 @@ public class AuthService {
             throw new IllegalArgumentException("Email đã được sử dụng");
         }
 
-        Roles userRole = roleRepository.findByName("ROLE_ADMIN")
-                .orElseThrow(() -> new IllegalStateException("Role ROLE_USER chưa được seed trong DB"));
+        Roles role = roleRepository.findByRoleCode("ROLE_ADMIN")
+                .orElseThrow(() -> new IllegalStateException("Role ROLE_MAKER chưa được seed trong DB"));
 
         User user = User.builder()
                 .userName(req.username())
                 .email(req.email())
                 .passWord(passwordEncoder.encode(req.password()))
-                .roles(Set.of(userRole))
+                .roles(Set.of(role))
                 .build();
 
-        userRepository.save(user);
+        userRepository.saveAndFlush(user);
 
         String token = jwtTokenUtils.generateToken(user);
         return AuthResponse.of(token, jwtTokenUtils.getExpirationMs(), user.getUsername());
     }
 
     public AuthResponse login(LoginRequest req) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(req.username(), req.password())
-        );
-        // Nếu sai username/password, AuthenticationManager tự ném BadCredentialsException
-
-        UserDetails user = userDetailsService.loadUserByUsername(req.username());
-        String token = jwtTokenUtils.generateToken(user);
-        return AuthResponse.of(token, jwtTokenUtils.getExpirationMs(), user.getUsername());
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                req.username(),
+                                req.password()
+                        )
+                );
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String token = jwtTokenUtils.generateToken(userDetails);
+        return AuthResponse.of(token, jwtTokenUtils.getExpirationMs(), userDetails.getUsername());
     }
 
 }

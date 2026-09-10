@@ -26,8 +26,8 @@ public class Component {
     @Column(name = "COMPONENT_CODE")
     private String componentCode;
 
-//    @Column(name = "COMPONENT_NAME")
-//    private String componentName;
+    @Column(name = "COMPONENT_NAME")
+    private String componentName;
 
 //    @Column(name = "MESSAGE_TYPE")
 //    private String messageType;

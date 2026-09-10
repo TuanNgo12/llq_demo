@@ -44,14 +44,18 @@ public class GroupCategoryServiceImpl implements GroupCategoryService{
     }
 
     @Override
+    public GroupCategory findById(Long id) {
+        return groupCategoryRepository.findById(id).orElseThrow();
+    }
+
+    @Override
     public GroupCategory add(GroupCategoryRequest request) {
-//        Map<String, String> errors = new HashMap<>();
-//        boolean exists = groupCategoryRepository.existsDuplicate(request.getParamValue(), request.getParamType());
         boolean existsDuplicate = groupCategoryRepository.existsDuplicate(
                 null,
-                request.getParamType(),
                 request.getParamValue(),
-                request.getEffectiveDate()
+                request.getParamType(),
+                request.getEffectiveDate(),
+                request.getEndEffectiveDate()
         );
         if (existsDuplicate){
             throw new ResponseStatusException(
@@ -59,20 +63,6 @@ public class GroupCategoryServiceImpl implements GroupCategoryService{
                     "Dữ liệu đã tồn tại!"
             );
         }
-//        if (exists) {
-//            errors.put("paramType", "Loại tham số đã tồn tại");
-//            errors.put("paramValue", "Giá trị tham số đã tồn tại");
-//        }
-//        boolean checkDate = groupCategoryRepository.existsEffectiveDateInRange(null, request.getEffectiveDate());
-//        if (checkDate){
-//            errors.put("effectiveDate", "Ngày hiệu lực đã tồn tại");
-//        }
-//        if (!errors.isEmpty()) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.CONFLICT,
-//                    objectMapper.writeValueAsString(errors)
-//            );
-//        }
         GroupCategory groupCategory = new GroupCategory();
         mapRequestToEntity(request, groupCategory);
         groupCategory.setStatus(1);
