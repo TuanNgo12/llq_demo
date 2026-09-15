@@ -41,7 +41,7 @@ public class AuthService {
         }
 
         Roles role = roleRepository.findByRoleCode("ROLE_ADMIN")
-                .orElseThrow(() -> new IllegalStateException("Role ROLE_MAKER chưa được seed trong DB"));
+                .orElseThrow(() -> new IllegalStateException("Role ROLE_ADMIN chưa được seed trong DB"));
 
         User user = User.builder()
                 .userName(req.username())
